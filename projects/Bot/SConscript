@@ -13,6 +13,7 @@ env['CSC_SEARCH'] = [
 # it will be stored with the call to AddToRefPaths() in the above example
 env['CSC_LIBS'] = [
     "Assembly-CSharp.dll",
+    "Assembly-CSharp-firstpass.dll",
     "KopiLuaInterface.dll",
     "UnityEngine.dll"
 ]

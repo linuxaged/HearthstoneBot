@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Reflection;
 
+using PegasusShared;
+
 namespace HearthstoneBot
 {
     public class AIBot
@@ -18,8 +20,8 @@ namespace HearthstoneBot
         {
             TOURNAMENT_RANKED,
             TOURNAMENT_UNRANKED,
-            PRATICE_NORMAL,
-            PRATICE_EXPERT
+            PRACTICE_NORMAL,
+            PRACTICE_EXPERT
         };
 
         public void setMode(Mode m)
@@ -87,37 +89,39 @@ namespace HearthstoneBot
 			}
         }
 
-        // Get a random pratice AI mission
-        private MissionID getRandomAIMissionID(bool expert)
+        // Get a random PRACTICE AI mission
+        private int getRandomAIMissionId(bool expert)
         {
+            // from SCENARIO.XML
+
             // List of normal AI mission IDs
-            ReadOnlyCollection<MissionID> AI_Normal =
-                new ReadOnlyCollection<MissionID>(new []
-            {
-                MissionID.AI_NORMAL_MAGE,   MissionID.AI_NORMAL_WARLOCK,
-                MissionID.AI_NORMAL_HUNTER, MissionID.AI_NORMAL_ROGUE,
-                MissionID.AI_NORMAL_PRIEST, MissionID.AI_NORMAL_WARRIOR,
-                MissionID.AI_NORMAL_DRUID,  MissionID.AI_NORMAL_PALADIN,
-                MissionID.AI_NORMAL_SHAMAN
-            });
+            int[] AI_Normal = new [] {
+                252, 253,
+                256, 257,
+                258, 259,
+                261, 262,
+                263
+//                MissionId.AI_NORMAL_MAGE,   MissionId.AI_NORMAL_WARLOCK,
+//                MissionId.AI_NORMAL_HUNTER, MissionId.AI_NORMAL_ROGUE,
+//                MissionId.AI_NORMAL_PRIEST, MissionId.AI_NORMAL_WARRIOR,
+//                MissionId.AI_NORMAL_DRUID,  MissionId.AI_NORMAL_PALADIN,
+//                MissionId.AI_NORMAL_SHAMAN
+            };
 
             // List of expert AI mission IDs
-            ReadOnlyCollection<MissionID> AI_Expert =
-                new ReadOnlyCollection<MissionID>(new []
-            {
-                MissionID.AI_EXPERT_MAGE,   MissionID.AI_EXPERT_WARLOCK,
-                MissionID.AI_EXPERT_HUNTER, MissionID.AI_EXPERT_ROGUE,
-                MissionID.AI_EXPERT_PRIEST, MissionID.AI_EXPERT_WARRIOR,
-                MissionID.AI_EXPERT_DRUID,  MissionID.AI_EXPERT_PALADIN,
-                MissionID.AI_EXPERT_SHAMAN
-            });
+            int[] AI_Expert = new [] {
+                (int)MissionId.PRACTICE_EXPERT_MAGE, (int)MissionId.PRACTICE_EXPERT_WARLOCK,
+                (int)MissionId.PRACTICE_EXPERT_HUNTER, (int)MissionId.PRACTICE_EXPERT_ROGUE,
+                (int)MissionId.PRACTICE_EXPERT_PRIEST, (int)MissionId.PRACTICE_EXPERT_WARRIOR,
+                (int)MissionId.PRACTICE_EXPERT_DRUID, (int)MissionId.PRACTICE_EXPERT_PALADIN,
+                (int)MissionId.PRACTICE_EXPERT_SHAMAN
+            };
 
             // Select the requested AI type
-            ReadOnlyCollection<MissionID> AI_Selected =
-                (expert) ? AI_Expert : AI_Normal;
+            int[] AI_Selected = (expert) ? AI_Expert : AI_Normal;
 
             // Pick a random index
-            int index = random.Next(AI_Selected.Count);
+            int index = random.Next(AI_Selected.Length);
             // Return the corresponding ID
             return AI_Selected[index];
         }
@@ -182,7 +186,7 @@ namespace HearthstoneBot
 
             // Don't do this, if we're currently in a game, or matching a game
             // TODO: Change to an assertion
-            if (SceneMgr.Get().IsInGame() || Network.IsMatching())
+            if (SceneMgr.Get().IsInGame() || GameMgr.Get().IsFindingGame())
             {
                 return;
             }
@@ -204,35 +208,20 @@ namespace HearthstoneBot
             // Get the ID of the current Deck
             long selectedDeckID = DeckPickerTrayDisplay.Get().GetSelectedDeckID();
             // We want to play vs other players
-            MissionID missionID = MissionID.MULTIPLAYER_1v1;
+            int mission = (int)MissionId.MULTIPLAYER_1v1;
             // Ranked or unranked?
-            GameMode mode = ranked ? GameMode.RANKED_PLAY : GameMode.UNRANKED_PLAY;
-            // Setup up the game
-            GameMgr.Get().SetNextGame(mode, missionID);
-            // Do network join
-            if(ranked)
-            {
-                Network.TrackClient(Network.TrackLevel.LEVEL_INFO,
-                        Network.TrackWhat.TRACK_PLAY_TOURNAMENT_WITH_CUSTOM_DECK);
-                Network.RankedMatch(selectedDeckID);
-            }
-            else
-            {
-                Network.TrackClient(Network.TrackLevel.LEVEL_INFO,
-                        Network.TrackWhat.TRACK_PLAY_CASUAL_WITH_CUSTOM_DECK);
-                Network.UnrankedMatch(selectedDeckID);
-            }
-            // Set status
-            FriendChallengeMgr.Get().OnEnteredMatchmakerQueue();
-            GameMgr.Get().UpdatePresence();
+            GameType mode = ranked ? GameType.GT_RANKED : GameType.GT_UNRANKED;
+            // Find the game
+            GameMgr.Get().FindGame(mode, mission, selectedDeckID);
 
             just_joined = true;
         }
 
         // Play against AI
         // Found at: PracticePickerTrayDisplay search for StartGame
-        private void pratice_mode(bool expert)
+        private void practice_mode(bool expert)
         {
+            Log.log("practice_mode");
             if (just_joined)
                 return;
 
@@ -242,21 +231,29 @@ namespace HearthstoneBot
             {
                 return;
             }
+
+            Log.log("Changing adventureconfig...");
+            AdventureConfig.Get().SetSelectedAdventureMode(AdventureId.PRACTICE, expert ? AdventureModeId.EXPERT : AdventureModeId.NORMAL);
+            AdventureConfig.Get().ChangeSubScene(AdventureSubScenes.MissionDeckPicker);
+
             // Delay 5 seconds for loading and such
             // TODO: Smarter delaying
             Delay(5000);
 
-            Log.log("Joining game in practice mode, expert = " + expert);
-
+            Log.log("delay over...");
             // Get the ID of the current Deck
             long selectedDeckID = DeckPickerTrayDisplay.Get().GetSelectedDeckID();
+            Log.log("got selected deck = " + selectedDeckID);
+
             // Get a random mission, of selected difficulty
-            MissionID missionID = getRandomAIMissionID(expert);
+            int mission = getRandomAIMissionId(expert);
+            Log.log("Joining game in practice mode, expert = " + expert + ", mission = " + mission);
+
             // Start up the game
-            GameMgr.Get().StartGame(GameMode.PRACTICE, missionID, selectedDeckID);
-            // Set status
-            GameMgr.Get().UpdatePresence();
-            
+            GameMgr.Get().FindGame(GameType.GT_VS_AI, mission, selectedDeckID);
+
+            Log.log("After findgame");
+
             just_joined = true;
         }
 
@@ -411,10 +408,10 @@ namespace HearthstoneBot
                 case SceneMgr.Mode.HUB:
                     switch(game_mode)
                     {
-                        case Mode.PRATICE_NORMAL:
-                        case Mode.PRATICE_EXPERT:
-                            // Enter Pratice Mode
-                            SceneMgr.Get().SetNextMode(SceneMgr.Mode.PRACTICE);
+                        case Mode.PRACTICE_NORMAL:
+                        case Mode.PRACTICE_EXPERT:
+                            // Enter PRACTICE Mode
+                            SceneMgr.Get().SetNextMode(SceneMgr.Mode.ADVENTURE);
                             break;
 
                         case Mode.TOURNAMENT_RANKED:
@@ -440,16 +437,16 @@ namespace HearthstoneBot
                     just_joined = false;
                     break; 
 
-                // In Pratice Sub Menu
-                case SceneMgr.Mode.PRACTICE:
+                // In PRACTICE Sub Menu
+                case SceneMgr.Mode.ADVENTURE:
                     bool expert = false;
                     switch(game_mode)
                     {
-                        case Mode.PRATICE_NORMAL:
+                        case Mode.PRACTICE_NORMAL:
                             expert = false;
                             break;
 
-                        case Mode.PRATICE_EXPERT:
+                        case Mode.PRACTICE_EXPERT:
                             expert = true;
                             break;
 
@@ -466,7 +463,7 @@ namespace HearthstoneBot
                     }
 
                     // Play against AI
-                    pratice_mode(expert);
+                    practice_mode(expert);
                     break;
 
                 // In Play Sub Menu
@@ -474,8 +471,8 @@ namespace HearthstoneBot
                     bool ranked = false;
                     switch(game_mode)
                     {
-                        case Mode.PRATICE_NORMAL:
-                        case Mode.PRATICE_EXPERT:
+                        case Mode.PRACTICE_NORMAL:
+                        case Mode.PRACTICE_EXPERT:
                             // Leave to the Hub
                             Log.say("Inside wrong sub-menu!");
                             SceneMgr.Get().SetNextMode(SceneMgr.Mode.HUB);

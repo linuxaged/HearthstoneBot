@@ -332,7 +332,7 @@ namespace HearthstoneBot
 
             string[] game_modes =
                 new string[]{"TOURNAMENT_RANKED", "TOURNAMENT_UNRANKED",
-                             "PRATICE_NORMAL",    "PRATICE_EXPERT"};
+                             "PRACTICE_NORMAL",    "PRACTICE_EXPERT"};
 
             cmb.Items.AddRange(game_modes);
             cmb.Name = "GameMode";
