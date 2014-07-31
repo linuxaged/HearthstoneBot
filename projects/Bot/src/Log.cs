@@ -16,6 +16,8 @@ namespace HearthstoneBot
         public const string default_error_log_name = "DefaultError.log";
         // Default debug log name
         public const string default_debug_log_name = "DefaultDebug.log";
+        // Default everything log name
+        public const string default_everything_log_name = "DefaultEverything.log";
 
         // Change the log directory
 		public static void new_log_directory(string new_log_dir)
@@ -83,6 +85,10 @@ namespace HearthstoneBot
             using (TextWriter tw = (StreamWriter) File.AppendText(log_path))
             {
                 tw.WriteLine(log_message);
+            }
+            // Also write to everything file
+            if (! log.Equals(default_everything_log_name)) {
+                Log.log(msg, default_everything_log_name);
             }
 		}
 	}
