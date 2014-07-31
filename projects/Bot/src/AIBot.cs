@@ -92,36 +92,23 @@ namespace HearthstoneBot
         // Get a random PRACTICE AI mission
         private int getRandomAIMissionId(bool expert)
         {
-            // from SCENARIO.XML
+            List<int> AI_Selected = new List<int>();
 
-            // List of normal AI mission IDs
-            int[] AI_Normal = new [] {
-                252, 253,
-                256, 257,
-                258, 259,
-                261, 262,
-                263
-//                MissionId.AI_NORMAL_MAGE,   MissionId.AI_NORMAL_WARLOCK,
-//                MissionId.AI_NORMAL_HUNTER, MissionId.AI_NORMAL_ROGUE,
-//                MissionId.AI_NORMAL_PRIEST, MissionId.AI_NORMAL_WARRIOR,
-//                MissionId.AI_NORMAL_DRUID,  MissionId.AI_NORMAL_PALADIN,
-//                MissionId.AI_NORMAL_SHAMAN
-            };
-
-            // List of expert AI mission IDs
-            int[] AI_Expert = new [] {
-                (int)MissionId.PRACTICE_EXPERT_MAGE, (int)MissionId.PRACTICE_EXPERT_WARLOCK,
-                (int)MissionId.PRACTICE_EXPERT_HUNTER, (int)MissionId.PRACTICE_EXPERT_ROGUE,
-                (int)MissionId.PRACTICE_EXPERT_PRIEST, (int)MissionId.PRACTICE_EXPERT_WARRIOR,
-                (int)MissionId.PRACTICE_EXPERT_DRUID, (int)MissionId.PRACTICE_EXPERT_PALADIN,
-                (int)MissionId.PRACTICE_EXPERT_SHAMAN
-            };
-
-            // Select the requested AI type
-            int[] AI_Selected = (expert) ? AI_Expert : AI_Normal;
+            // Get mission IDs from SCENARIO.XML
+            AdventureModeId mode = expert ? AdventureModeId.EXPERT : AdventureModeId.NORMAL;
+            foreach (DbfRecord current in GameDbf.Scenario.GetRecords())
+            {
+                if (current.GetInt("ADVENTURE_ID") == (int)AdventureId.PRACTICE)
+                {
+                    if (current.GetInt("MODE_ID") == (int)mode)
+                    {
+                        AI_Selected.Add(current.GetInt("ID"));
+                    }
+                }
+            }
 
             // Pick a random index
-            int index = random.Next(AI_Selected.Length);
+            int index = random.Next(AI_Selected.Count);
             // Return the corresponding ID
             return AI_Selected[index];
         }
@@ -217,11 +204,12 @@ namespace HearthstoneBot
             just_joined = true;
         }
 
+        bool deck_initialized = false;
+
         // Play against AI
         // Found at: PracticePickerTrayDisplay search for StartGame
         private void practice_mode(bool expert)
         {
-            Log.log("practice_mode");
             if (just_joined)
                 return;
 
@@ -232,29 +220,37 @@ namespace HearthstoneBot
                 return;
             }
 
-            Log.log("Changing adventureconfig...");
-            AdventureConfig.Get().SetSelectedAdventureMode(AdventureId.PRACTICE, expert ? AdventureModeId.EXPERT : AdventureModeId.NORMAL);
-            AdventureConfig.Get().ChangeSubScene(AdventureSubScenes.MissionDeckPicker);
+            if (! deck_initialized) {
+                Delay(5000);
 
-            // Delay 5 seconds for loading and such
-            // TODO: Smarter delaying
-            Delay(5000);
+                Log.log("Changing adventureconfig...");
+                AdventureConfig.Get().SetSelectedAdventureMode(AdventureId.PRACTICE, expert ? AdventureModeId.EXPERT : AdventureModeId.NORMAL);
+                AdventureConfig.Get().ChangeSubScene(AdventureSubScenes.MissionDeckPicker);
 
-            Log.log("delay over...");
-            // Get the ID of the current Deck
-            long selectedDeckID = DeckPickerTrayDisplay.Get().GetSelectedDeckID();
-            Log.log("got selected deck = " + selectedDeckID);
+                deck_initialized = true;
+            } else {
+                Delay(5000);
 
-            // Get a random mission, of selected difficulty
-            int mission = getRandomAIMissionId(expert);
-            Log.log("Joining game in practice mode, expert = " + expert + ", mission = " + mission);
+                // Get the ID of the current Deck
+                Log.log("Getting Deck id");
+                long selectedDeckID = DeckPickerTrayDisplay.Get().GetSelectedDeckID();
+                if (selectedDeckID == 0) {
+                    Log.log("Invalid Deck ID 0!");
+                    return;
+                }
 
-            // Start up the game
-            GameMgr.Get().FindGame(GameType.GT_VS_AI, mission, selectedDeckID);
+                // Get a random mission, of selected difficulty
+                Log.log("getting random mission");
+                int mission = getRandomAIMissionId(expert);
 
-            Log.log("After findgame");
+                // Start up the game
+                Log.log("Starting game in practice mode, expert = " + expert + ", mission = " + mission + ", deck = " + selectedDeckID);
+                Log.say("Starting game");
+                GameMgr.Get().FindGame(GameType.GT_VS_AI, mission, selectedDeckID);
 
-            just_joined = true;
+                just_joined = true;
+                deck_initialized = false;
+            }
         }
 
         // Called when a game is in mulligan state
