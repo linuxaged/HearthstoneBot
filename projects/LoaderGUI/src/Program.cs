@@ -337,6 +337,7 @@ namespace HearthstoneBot
             cmb.Items.AddRange(game_modes);
             cmb.Name = "GameMode";
             cmb.Size = new Size(btn5.Width*2, btn5.Height);
+            cmb.SelectedIndex = 2;
 
             // Create status bar
             sb = new StatusBar();
