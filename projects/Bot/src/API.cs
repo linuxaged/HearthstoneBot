@@ -399,6 +399,7 @@ namespace HearthstoneBot
 
             ZonePlay m_myPlayZone = PrivateHacker.get_m_myPlayZone();
             ZoneHand m_myHandZone = PrivateHacker.get_m_myHandZone();
+            ZoneWeapon m_myWeaponZone = PrivateHacker.get_m_myWeaponZone();
             
             component.SetDoNotSort(false);
             iTween.Stop(input_man.heldObject);
@@ -423,6 +424,7 @@ namespace HearthstoneBot
             Zone card_zone = component.GetZone();
             if ((card_zone == null) || card_zone.m_ServerTag != TAG_ZONE.HAND)
             {
+                Log.error("Trying to drop card that is not in hand");
                 return false;
             }
             
@@ -430,10 +432,9 @@ namespace HearthstoneBot
 
             bool is_minion = entity.IsMinion();
             bool is_weapon = entity.IsWeapon();
-
             if (is_minion || is_weapon)
             {
-                Zone zone = (!is_weapon) ? (Zone) m_myPlayZone : (Zone) PrivateHacker.get_m_myWeaponZone();
+                Zone zone = (!is_weapon) ? (Zone )m_myPlayZone : (Zone) m_myWeaponZone;
                 if (zone)
                 {
                     GameState gameState = GameState.Get();
@@ -445,14 +446,7 @@ namespace HearthstoneBot
                     }
                     if (input_man.DoNetworkResponse(entity))
                     {
-                        if (is_weapon)
-                        {
-                            PrivateHacker.set_m_lastZoneChangeList(ZoneMgr.Get().AddLocalZoneChange(component, zone, zone.GetLastPos()));
-                        }
-                        else
-                        {
-                            PrivateHacker.set_m_lastZoneChangeList(ZoneMgr.Get().AddPredictedLocalZoneChange(component, zone, requested_zone_position, card_position));
-                        }
+                        PrivateHacker.set_m_lastZoneChangeList(ZoneMgr.Get().AddPredictedLocalZoneChange(component, zone, requested_zone_position, card_position));
                         PrivateHacker.ForceManaUpdate(entity);
                         if (is_minion && gameState.EntityHasTargets(entity))
                         {
@@ -492,15 +486,7 @@ namespace HearthstoneBot
                     else
                     {
                         input_man.DoNetworkResponse(entity);
-                        if (entity.IsSecret())
-                        {
-                            ZoneSecret m_mySecretZone = PrivateHacker.get_m_mySecretZone();
-                            PrivateHacker.set_m_lastZoneChangeList(ZoneMgr.Get().AddLocalZoneChange(component, m_mySecretZone, m_mySecretZone.GetLastPos()));
-                        }
-                        else
-                        {
-                            PrivateHacker.set_m_lastZoneChangeList(ZoneMgr.Get().AddLocalZoneChange(component, TAG_ZONE.PLAY));
-                        }
+                        PrivateHacker.set_m_lastZoneChangeList(ZoneMgr.Get().AddLocalZoneChange(component, TAG_ZONE.PLAY));
                         PrivateHacker.ForceManaUpdate(entity);
                         PrivateHacker.PlayPowerUpSpell(component);
                         PrivateHacker.PlayPlaySpell(component);

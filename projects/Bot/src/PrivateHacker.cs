@@ -68,13 +68,6 @@ namespace HearthstoneBot
             return (ZoneWeapon) myFieldInfo.GetValue(input_mgr); 
         }
 
-        public static ZoneSecret get_m_mySecretZone()
-        {
-            InputManager input_mgr = InputManager.Get();
-            FieldInfo myFieldInfo = input_mgr.GetType().GetField("m_mySecretZone", BindingFlags.NonPublic | BindingFlags.Instance); 
-            return (ZoneSecret) myFieldInfo.GetValue(input_mgr);
-        }
-
         public static void set_m_battlecrySourceCard(Card val)
         {
             InputManager input_mgr = InputManager.Get();
