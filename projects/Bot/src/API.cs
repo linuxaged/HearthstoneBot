@@ -86,9 +86,7 @@ namespace HearthstoneBot
          */
         public int PerformAction(Action action)
         {
-            Log.log("Performing action: " + action);
             action.perform();
-            Log.log("Performed action: " + action);
             return action.delay();
         }
 

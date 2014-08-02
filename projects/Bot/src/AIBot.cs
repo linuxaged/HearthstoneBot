@@ -127,14 +127,16 @@ namespace HearthstoneBot
             List<Card> replace = api.mulligan(cards);
 
             // Toggle them as replaced
+            MulliganManager mm = MulliganManager.Get();
             foreach (Card current in replace)
             {
-                MulliganManager.Get().ToggleHoldState(current);
+                Log.log(current.ToString());
+                mm.ToggleHoldState(current);
             }
 
             // Report progress
-            Log.say("Mulligan Ended : " + replace.Count + " cards changed");
-		}
+            Log.log("Mulligan Ended : " + replace.Count + " cards changed");
+        }
 
         // Welcome / login screen
         private void login_mode()
@@ -176,7 +178,7 @@ namespace HearthstoneBot
                 return;
             }
 
-            Log.log("Joining game in tournament mode, ranked = " + ranked);
+            Log.say("Joining game in tournament mode, ranked = " + ranked);
 
             // Get the ID of the current Deck
             long selectedDeckID = DeckPickerTrayDisplay.Get().GetSelectedDeckID();
@@ -221,12 +223,11 @@ namespace HearthstoneBot
                 Log.log("Getting Deck id");
                 long selectedDeckID = DeckPickerTrayDisplay.Get().GetSelectedDeckID();
                 if (selectedDeckID == 0) {
-                    Log.log("Invalid Deck ID 0!");
+                    Log.error("Invalid Deck ID 0!");
                     return;
                 }
 
                 // Get a random mission, of selected difficulty
-                Log.log("getting random mission");
                 int mission = getRandomAIMissionId(expert);
 
                 // Start up the game
@@ -279,8 +280,6 @@ namespace HearthstoneBot
         {
             try
             {
-                Log.log("There are " + queuedActions.Count + " queued actions.");
-
                 // Perform queued actions first
                 if(queuedActions.Count > 0)
                 {
@@ -297,12 +296,8 @@ namespace HearthstoneBot
                 // Get hand cards
                 var cards = API.getOurPlayer().GetHandZone().GetCards().ToList<Card>();
 
-                Log.log("There are " + cards.Count + " cards in our hand.");
-
                 // Get initial actions to perform
-                Log.log("Calling turn function...");
                 var actions = api.turn(cards);
-                Log.log("The turn function returned " + actions.Count + " actions.");
 
                 // Queue up these actions
                 queuedActions.AddRange(actions);
@@ -310,6 +305,7 @@ namespace HearthstoneBot
                 if (queuedActions.Count == 0)
                 {
                     // Done with turn actions
+                    Log.log("Ending turn");
                     end_turn();
                 }
             }
