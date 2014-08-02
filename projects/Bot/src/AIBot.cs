@@ -119,8 +119,8 @@ namespace HearthstoneBot
         }
 
         // Return whether Mulligan was done
-		private void mulligan()
-		{
+        private void mulligan()
+        {
             // Get hand cards
             List<Card> cards = API.getOurPlayer().GetHandZone().GetCards().ToList<Card>();
             // Ask the AI scripting system, to figure which cards to replace
@@ -131,10 +131,6 @@ namespace HearthstoneBot
             {
                 MulliganManager.Get().ToggleHoldState(current);
             }
-
-            // End mulligan
-            MulliganManager.Get().EndMulligan();
-            end_turn();
 
             // Report progress
             Log.say("Mulligan Ended : " + replace.Count + " cards changed");
@@ -325,11 +321,11 @@ namespace HearthstoneBot
         }
 
         // Used to manage delays for some phases
-        private bool was_in_mulligan = false;
         private bool was_my_turn = false;
 
         // Keep track of if we ended mulligan
-        private bool mulligan_ended = false;
+        private enum MulliganState { BEGIN, DO_TOGGLE, DO_END, DONE };
+        private MulliganState mulligan_state = MulliganState.BEGIN;
 
         private void gameplay_mode()
         {
@@ -338,16 +334,24 @@ namespace HearthstoneBot
             // If we're in mulligan
             if (gs.IsMulliganPhase())
             {
-                if (was_in_mulligan && !mulligan_ended)
-                {
-                    mulligan();
-                    mulligan_ended = true;
-                    Delay(1000);
-                }
-                else
-                {
-                    was_in_mulligan = true;
+                if (mulligan_state == MulliganState.BEGIN) {
+                    mulligan_state = MulliganState.DO_TOGGLE;
                     Delay(15000);
+                }
+                else if(mulligan_state == MulliganState.DO_TOGGLE)
+                {
+                    if(gs.IsMulliganManagerActive() && PrivateHacker.get_introComplete())
+                    {
+                        mulligan();
+                        mulligan_state = MulliganState.DO_END;
+                        Delay(5000);
+                    }
+                }
+                else if (mulligan_state == MulliganState.DO_END)
+                {
+                    MulliganManager.Get().AutomaticContinueMulligan();
+                    mulligan_state = MulliganState.DONE;
+                    Delay(5000);
                 }
                 return;
             }
@@ -376,8 +380,7 @@ namespace HearthstoneBot
             }
 
             // Reset variables
-            was_in_mulligan = false;
-            mulligan_ended = false;
+            mulligan_state = MulliganState.BEGIN;
         }
 
         // Run a single AI tick

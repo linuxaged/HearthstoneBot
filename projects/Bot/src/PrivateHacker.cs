@@ -62,6 +62,11 @@ namespace HearthstoneBot
             return (ZoneHand) get_private_field(InputManager.Get(), "m_myHandZone");
         }
 
+        public static bool get_introComplete()
+        {
+            return (bool) get_private_field(MulliganManager.Get(), "introComplete");
+        }
+
         public static ZoneWeapon get_m_myWeaponZone()
         {
             return (ZoneWeapon) get_private_field(InputManager.Get(), "m_myWeaponZone");
