@@ -512,19 +512,19 @@ namespace HearthstoneBot
             return true;
         }
 
-		public static bool drop_card(Card c, bool pickup)
-		{
-			Log.log("Dropped card: " + c.GetEntity().GetName());
+        public static bool drop_card(Card c, bool pickup)
+        {
+            Log.log("Dropped card: " + c.GetEntity().GetName());
 
             if (pickup)
             {
-                PrivateHacker.GrabCard(c);
+                PrivateHacker.HandleClickOnCard(c);
             }
             else
             {
                 return drop_held_card();
             }
             return false;
-		}
+        }
     }
 }

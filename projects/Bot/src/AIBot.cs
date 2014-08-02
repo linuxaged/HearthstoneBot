@@ -78,20 +78,20 @@ namespace HearthstoneBot
             }
 
             // Try to run the main loop
-			try
-			{
+            try
+            {
                 // Only do this, if the bot is running
-				if (Plugin.isRunning())
-				{
+                if (Plugin.isRunning())
+                {
                     update();
-				}
-			}
-			catch(Exception e)
-			{
+                }
+            }
+            catch(Exception e)
+            {
                 Log.error("Exception in AI: " + e.Message);
                 Log.error(e.ToString());
                 Delay(10000);
-			}
+            }
         }
 
         // Get a random PRACTICE AI mission
@@ -273,10 +273,10 @@ namespace HearthstoneBot
         }
 
         private void end_turn()
-		{
-			InputManager.Get().DoEndTurnButton();
+        {
+            InputManager.Get().DoEndTurnButton();
             Delay(10000);
-		}
+        }
 
         // Called to invoke AI
         private void run_ai()
