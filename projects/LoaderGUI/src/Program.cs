@@ -208,7 +208,15 @@ namespace HearthstoneBot
                 setStatus("Scripts reloaded");
             }
         }
-        
+
+        private void unjector(object sender, EventArgs e)
+        {
+            Process proc = new Process();
+            proc.StartInfo.FileName ="Unjector.exe";
+            log("Starting: unjector.exe");
+            proc.Start();
+        }
+
         private void startbot(object sender, EventArgs e)
         {
             setStatus("Starting bot");
@@ -308,6 +316,12 @@ namespace HearthstoneBot
             btn3.Parent = buttons1;
             btn3.Anchor = AnchorStyles.Right;
             btn3.Click += new EventHandler(reload_scripts);
+
+            Button btnu = new Button();
+            btnu.Text = "Unjector";
+            btnu.Parent = buttons1;
+            btnu.Anchor = AnchorStyles.Right;
+            btnu.Click += new EventHandler(unjector);
 
             FlowLayoutPanel buttons2 = new FlowLayoutPanel();
             buttons2.AutoSize = true;
