@@ -178,8 +178,6 @@ namespace HearthstoneBot
                 return;
             }
 
-            Log.say("Joining game in tournament mode, ranked = " + ranked);
-
             // Get the ID of the current Deck
             long selectedDeckID = DeckPickerTrayDisplay.Get().GetSelectedDeckID();
             // We want to play vs other players
@@ -187,6 +185,8 @@ namespace HearthstoneBot
             // Ranked or unranked?
             GameType mode = ranked ? GameType.GT_RANKED : GameType.GT_UNRANKED;
             // Find the game
+            Log.log("Joining game in tournament mode, ranked = " + ranked);
+            DeckPickerTrayDisplay.Get().ShowMatchingPopup();
             GameMgr.Get().FindGame(mode, mission, selectedDeckID);
 
             just_joined = true;
@@ -229,7 +229,7 @@ namespace HearthstoneBot
 
                 // Start up the game
                 Log.log("Starting game in practice mode, expert = " + expert + ", mission = " + mission + ", deck = " + selectedDeckID);
-                Log.say("Starting game");
+                DeckPickerTrayDisplay.Get().GetLoadingPopup().Show();
                 GameMgr.Get().FindGame(GameType.GT_VS_AI, mission, selectedDeckID);
 
                 just_joined = true;
