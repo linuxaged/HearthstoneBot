@@ -362,12 +362,12 @@ namespace HearthstoneBot
             return GameState.Get().GetFirstOpponentPlayer(getOurPlayer());
         }
 
-		public static void attack(Card c)
-		{
-			Log.log("Attack: " + c.GetEntity().GetName());
+        public static void attack(Card c)
+        {
+            Log.log("Attack: " + c.GetEntity().GetName());
             
-            PrivateHacker.HandleClickOnCardInBattlefield(c);
-		}
+            PrivateHacker.HandleClickOnCard(c);
+        }
 
         public static bool drop_held_card(int requested_zone_position = 1) 
         {

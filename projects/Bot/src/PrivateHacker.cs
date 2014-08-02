@@ -32,6 +32,11 @@ namespace HearthstoneBot
             call_private_method(InputManager.Get(), "ForceManaUpdate", new object[] { entity });
         }
 
+        public static void HandleClickOnCard(Card c)
+        {
+            call_private_method(InputManager.Get(), "HandleClickOnCard", new object[] { c.gameObject });
+        }
+
         public static void HandleClickOnCardInBattlefield(Card c)
         {
             call_private_method(InputManager.Get(), "HandleClickOnCardInBattlefield", new object[] { c.GetEntity() });
