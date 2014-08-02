@@ -209,16 +209,13 @@ namespace HearthstoneBot
             }
 
             if (! deck_initialized) {
-                Delay(5000);
-
                 Log.log("Changing adventureconfig...");
                 AdventureConfig.Get().SetSelectedAdventureMode(AdventureId.PRACTICE, expert ? AdventureModeId.EXPERT : AdventureModeId.NORMAL);
                 AdventureConfig.Get().ChangeSubScene(AdventureSubScenes.MissionDeckPicker);
 
                 deck_initialized = true;
-            } else {
                 Delay(5000);
-
+            } else {
                 // Get the ID of the current Deck
                 Log.log("Getting Deck id");
                 long selectedDeckID = DeckPickerTrayDisplay.Get().GetSelectedDeckID();
@@ -237,6 +234,7 @@ namespace HearthstoneBot
 
                 just_joined = true;
                 deck_initialized = false;
+                Delay(5000);
             }
         }
 
