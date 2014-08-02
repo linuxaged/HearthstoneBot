@@ -380,6 +380,9 @@ namespace HearthstoneBot
         // Run a single AI tick
         private void update()
         {
+            // Avoid InactivePlayerKicker
+            PrivateHacker.set_m_activityDetected(true);
+
             // Get current scene mode
             SceneMgr.Mode scene_mode = SceneMgr.Get().GetMode();
 

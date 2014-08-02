@@ -81,5 +81,10 @@ namespace HearthstoneBot
         {
             set_private_field(InputManager.Get(), "m_lastZoneChangeList", val);
         }
+
+        public static void set_m_activityDetected(bool val)
+        {
+            set_private_field(InactivePlayerKicker.Get(), "m_activityDetected", val);
+        }
     }
 }
