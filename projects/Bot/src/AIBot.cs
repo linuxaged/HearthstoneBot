@@ -276,6 +276,10 @@ namespace HearthstoneBot
         // Called to invoke AI
         private void run_ai()
         {
+            // Temporarily disable reticle so mouse doesn't have to stay in window
+            TargetReticleManager trm = TargetReticleManager.Get();
+            PrivateHacker.set_TargetReticleManager_s_instance(null);
+
             try
             {
                 // Perform queued actions first
@@ -312,6 +316,9 @@ namespace HearthstoneBot
                 Log.error("Exception in run_ai: " + e.Message);
                 Log.error(e.ToString());
             }
+
+            // Re-enable TargetReticleManager
+            PrivateHacker.set_TargetReticleManager_s_instance(trm);
         }
 
         // Used to manage delays for some phases

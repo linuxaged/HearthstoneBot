@@ -91,5 +91,11 @@ namespace HearthstoneBot
         {
             set_private_field(InactivePlayerKicker.Get(), "m_activityDetected", val);
         }
+
+        public static void set_TargetReticleManager_s_instance(TargetReticleManager i)
+        {
+            FieldInfo myFieldInfo = typeof(TargetReticleManager).GetField("s_instance", BindingFlags.NonPublic | BindingFlags.Static);
+            myFieldInfo.SetValue(null, i);
+        }
     }
 }
