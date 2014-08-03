@@ -325,7 +325,7 @@ namespace HearthstoneBot
         private bool was_my_turn = false;
 
         // Keep track of if we ended mulligan
-        private enum MulliganState { BEGIN, DO_TOGGLE, DO_END, DONE };
+        private enum MulliganState { BEGIN, DO_END, DONE };
         private MulliganState mulligan_state = MulliganState.BEGIN;
 
         private void gameplay_mode()
@@ -335,24 +335,19 @@ namespace HearthstoneBot
             // If we're in mulligan
             if (gs.IsMulliganPhase())
             {
-                if (mulligan_state == MulliganState.BEGIN) {
-                    mulligan_state = MulliganState.DO_TOGGLE;
-                    Delay(15000);
-                }
-                else if(mulligan_state == MulliganState.DO_TOGGLE)
+                if (mulligan_state == MulliganState.BEGIN)
                 {
-                    if(gs.IsMulliganManagerActive() && PrivateHacker.get_introComplete())
+                    if(gs.IsMulliganManagerActive() && PrivateHacker.get_m_UIbuttons() != null)
                     {
                         mulligan();
                         mulligan_state = MulliganState.DO_END;
-                        Delay(5000);
+                        Delay(2000);
                     }
                 }
                 else if (mulligan_state == MulliganState.DO_END)
                 {
                     MulliganManager.Get().AutomaticContinueMulligan();
                     mulligan_state = MulliganState.DONE;
-                    Delay(5000);
                 }
                 return;
             }
