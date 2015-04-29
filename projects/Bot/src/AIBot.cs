@@ -100,10 +100,10 @@ namespace HearthstoneBot
             List<int> AI_Selected = new List<int>();
 
             // Get mission IDs from SCENARIO.XML
-            AdventureModeId mode = expert ? AdventureModeId.EXPERT : AdventureModeId.NORMAL;
+            AdventureModeDbId mode = expert ? AdventureModeDbId.EXPERT : AdventureModeDbId.NORMAL;
             foreach (DbfRecord current in GameDbf.Scenario.GetRecords())
             {
-                if (current.GetInt("ADVENTURE_ID") == (int)AdventureId.PRACTICE)
+                if (current.GetInt("ADVENTURE_ID") == (int)AdventureDbId.PRACTICE)
                 {
                     if (current.GetInt("MODE_ID") == (int)mode)
                     {
@@ -210,7 +210,7 @@ namespace HearthstoneBot
 
             if (! deck_initialized) {
                 Log.log("Changing adventureconfig...");
-                AdventureConfig.Get().SetSelectedAdventureMode(AdventureId.PRACTICE, expert ? AdventureModeId.EXPERT : AdventureModeId.NORMAL);
+                AdventureConfig.Get().SetSelectedAdventureMode(AdventureDbId.PRACTICE, expert ? AdventureModeDbId.EXPERT : AdventureModeDbId.NORMAL);
                 AdventureConfig.Get().ChangeSubScene(AdventureSubScenes.MissionDeckPicker);
 
                 deck_initialized = true;
