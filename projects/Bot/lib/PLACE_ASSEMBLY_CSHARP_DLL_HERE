@@ -1,1 +1,3 @@
 TODO: Make automatic download of this.
+
+Note: Assembly-CSharp.dll  Assembly-CSharp-firstpass.dll  Google.ProtocolBuffersLite.dll  PLACE_ASSEMBLY_CSHARP_DLL_HERE  PlayMaker.dll are all needed!
